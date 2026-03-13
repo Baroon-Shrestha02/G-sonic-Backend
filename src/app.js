@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import globalErrorHandler from "./middlewares/errorHandler.js";
 
+import authRoutes from "./routes/authRoutes.js";
+
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 
@@ -41,6 +43,8 @@ app.use(
 );
 
 app.use(cookieParser());
+
+app.use("/api/auth", authRoutes);
 
 app.use(globalErrorHandler);
 
