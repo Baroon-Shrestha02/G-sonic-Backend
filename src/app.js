@@ -1,9 +1,13 @@
 import express from "express";
 import cors from "cors";
 import globalErrorHandler from "./middlewares/errorHandler.js";
-
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
+
+import productRoutes from "./routes/productRoutes.js";
+import CategoryRoutes from "./routes/CategoryRoutes.js";
+
+
 
 const app = express();
 
@@ -40,7 +44,10 @@ app.use(
   }),
 );
 
-app.use(cookieParser());
+
+// routes
+app.use("/api/v1", productRoutes);
+app.use("/api/v1", CategoryRoutes);
 
 app.use(globalErrorHandler);
 
