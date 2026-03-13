@@ -7,6 +7,11 @@ import authRoutes from "./routes/authRoutes.js";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 
+import productRoutes from "./routes/productRoutes.js";
+import CategoryRoutes from "./routes/CategoryRoutes.js";
+
+
+
 const app = express();
 
 // const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];
@@ -42,7 +47,10 @@ app.use(
   }),
 );
 
-app.use(cookieParser());
+
+// routes
+app.use("/api/v1", productRoutes);
+app.use("/api/v1", CategoryRoutes);
 
 app.use("/api/auth", authRoutes);
 
