@@ -4,6 +4,7 @@ import cloudinary from "cloudinary";
 
 import app from "./app.js";
 import Database from "./database/database.js";
+import createAdmin from "./utils/createAdmin.js";
 
 const PORT = process.env.PORT || 3000;
 
@@ -15,6 +16,7 @@ cloudinary.v2.config({
 
 Database()
   .then(async () => {
+    await createAdmin();
     app.listen(PORT, () => {
       console.log(`Server listeniing on port ${PORT}`);
     });
