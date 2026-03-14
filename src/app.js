@@ -8,7 +8,8 @@ import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 
 import productRoutes from "./routes/productRoutes.js";
-import CategoryRoutes from "./routes/CategoryRoutes.js";
+import CategoryRoutes from "./routes/categoryRoutes.js";
+import feedbackRoutes from "./routes/feedbackRoutes.js";
 
 
 
@@ -51,6 +52,7 @@ app.use(
 // routes
 app.use("/api/v1", productRoutes);
 app.use("/api/v1", CategoryRoutes);
+app.use("/api/v1", feedbackRoutes);
 app.use("/api/auth", authRoutes);
 
 app.use(globalErrorHandler);
