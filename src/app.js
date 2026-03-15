@@ -10,8 +10,6 @@ import fileUpload from "express-fileupload";
 import productRoutes from "./routes/productRoutes.js";
 import CategoryRoutes from "./routes/CategoryRoutes.js";
 
-
-
 const app = express();
 
 // const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];
@@ -46,7 +44,6 @@ app.use(
     tempFileDir: "/tmp/",
   }),
 );
-
 
 // routes
 app.use("/api/v1", productRoutes);
