@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   createProduct,
   getProducts,
@@ -8,16 +7,17 @@ import {
   deleteProduct,
 } from "../controllers/productController.js";
 
+import protect from "../middlewares/protectUser.js";
+
 const router = express.Router();
 
-router.post("/products", createProduct);
-
+// public routes
 router.get("/products", getProducts);
-
 router.get("/products/:id", getProductById);
 
-router.put("/products/:id", updateProduct);
-
-router.delete("/products/:id", deleteProduct);
+// admin only
+router.post("/products", protect, createProduct);
+router.put("/products/:id", protect, updateProduct);
+router.delete("/products/:id", protect, deleteProduct);
 
 export default router;

@@ -10,18 +10,21 @@ import {
   deleteSubCategory,
 } from "../controllers/CategoryController.js";
 
+import protect from "../middlewares/protectUser.js";
+
 const router = express.Router();
 
-// Category
-router.post("/categories", createCategory);
+// public routes
 router.get("/categories", getCategories);
-router.put("/categories/:id", updateCategory);
-router.delete("/categories/:id", deleteCategory);
-
-// SubCategory
-router.post("/subcategories", createSubCategory);
 router.get("/subcategories", getSubCategories);
-router.put("/subcategories/:id", updateSubCategory);
-router.delete("/subcategories/:id", deleteSubCategory);
+
+// admin only 
+router.post("/categories", protect, createCategory);
+router.put("/categories/:id", protect, updateCategory);
+router.delete("/categories/:id", protect, deleteCategory);
+
+router.post("/subcategories", protect, createSubCategory);
+router.put("/subcategories/:id", protect, updateSubCategory);
+router.delete("/subcategories/:id", protect, deleteSubCategory);
 
 export default router;
