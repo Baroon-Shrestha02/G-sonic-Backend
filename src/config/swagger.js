@@ -18,10 +18,10 @@ const options = {
         url: "http://localhost:3000",
         description: "Development server",
       },
-        {
-          url: "https://g-sonic-backend.onrender.com",
-          description: "Hosted testing server",
-        },
+      {
+        url: "https://g-sonic-backend.onrender.com",
+        description: "Hosted testing server",
+      },
     ],
     components: {
       securitySchemes: {
@@ -40,7 +40,7 @@ const options = {
       { name: "Feedback", description: "Feedbacks on products." },
     ],
   },
-  apis: [path.join(__dirname, "../Routes/*.js")],
+  apis: [path.join(__dirname, "../routes/*.js")],
 };
 
 const swaggerSpec = swaggerJSDoc(options);
