@@ -9,7 +9,7 @@ import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 
 import productRoutes from "./routes/productRoutes.js";
-import CategoryRoutes from "./routes/categoryRoutes.js";
+import CategoryRoutes from "./routes/CategoryRoutes.js";
 import feedbackRoutes from "./routes/feedbackRoutes.js";
 import swaggerSpec from "./config/swagger.js";
 
