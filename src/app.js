@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import globalErrorHandler from "./middlewares/errorHandler.js";
+import swaggerUi from "swagger-ui-express";
 
 import authRoutes from "./routes/authRoutes.js";
 
@@ -10,6 +11,7 @@ import fileUpload from "express-fileupload";
 import productRoutes from "./routes/productRoutes.js";
 import CategoryRoutes from "./routes/categoryRoutes.js";
 import feedbackRoutes from "./routes/feedbackRoutes.js";
+import swaggerSpec from "./config/swagger.js";
 
 const app = express();
 
@@ -51,6 +53,8 @@ app.use("/api/v1", productRoutes);
 app.use("/api/v1", CategoryRoutes);
 app.use("/api/v1", feedbackRoutes);
 app.use("/api/auth", authRoutes);
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(globalErrorHandler);
 

@@ -39,8 +39,6 @@ export const createFeedback = async (req, res) => {
   }
 };
 
-
-
 // GET FEEDBACK FOR A PRODUCT
 export const getProductFeedback = async (req, res) => {
   try {
