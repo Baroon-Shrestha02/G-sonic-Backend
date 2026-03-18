@@ -22,24 +22,27 @@ const router = express.Router();
  * @swagger
  * /api/v1/products:
  *   get:
- *     summary: Get all products
+ *     summary: Get all products grouped by category
  *     tags: [Products]
  *     parameters:
  *       - in: query
  *         name: category
  *         schema:
  *           type: string
- *         description: Filter by category name
+ *         description: Filter by category name (case-insensitive)
+ *         example: Mobile
  *       - in: query
  *         name: subCategory
  *         schema:
  *           type: string
- *         description: Filter by subCategory name
+ *         description: Filter by subCategory name (partial match)
+ *         example: Apple
  *       - in: query
  *         name: search
  *         schema:
  *           type: string
- *         description: Search by product name
+ *         description: Search by product name (partial match)
+ *         example: Iphone
  *     responses:
  *       200:
  *         description: Products grouped by category
@@ -49,16 +52,38 @@ const router = express.Router();
  *               success: true
  *               count: 2
  *               data:
- *                 - category_id: "cat1"
+ *                 - category_id: "69ba43a5efb3b9f635a73425"
  *                   category_name: "Mobile"
  *                   products:
- *                     - id: "prod1"
+ *                     - id: "69ba49229af74acdf1d758ab"
  *                       name: "OnePlus 12"
- *                       price: 80000
- *                       subCategory: "OnePlus"
+ *                       price: 100000
+ *                       discountPrice: 90000
+ *                       stock: 15
+ *                       description: "Flagship killer smartphone"
+ *                       subCategory: "One Plus"
  *                       image:
- *                         - public_id: "products/abc123"
- *                           url: "https://res.cloudinary.com/sample.jpg"
+ *                         - public_id: "zj93gofi7dsmgd0h7kwq"
+ *                           url: "https://res.cloudinary.com/sample/image.png"
+ *                           _id: "69ba49229af74acdf1d758ac"
+ *                     - id: "69ba91844e812a0c48ada750"
+ *                       name: "Iphone 17 Pro Max"
+ *                       price: 200000
+ *                       discountPrice: null
+ *                       stock: 10
+ *                       description: "Latest Apple flagship"
+ *                       subCategory: "Apple"
+ *                       image:
+ *                         - public_id: "ooc4dadnnsurssudubk0"
+ *                           url: "https://res.cloudinary.com/sample/image.webp"
+ *                           _id: "69ba91c44e812a0c48ada75a"
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: "error"
+ *               message: "Internal server error"
  */
 router.get("/products", getProducts);
 
