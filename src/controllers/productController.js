@@ -1,10 +1,14 @@
 import Product from "../models/productModel.js";
 import Category from "../models/categoryModel.js";
 import SubCategory from "../models/subCategoryMode.js";
-
 import AppError from "../utils/appError.js";
 import asyncErrorHandler from "../utils/asyncErrorHandler.js";
 import { uploadImages } from "../utils/imageUploader.js";
+import {
+  findOrCreateCategory,
+  findOrCreateSubCategory,
+} from "../utils/findOrCreate.js";
+import { v2 as cloudinary } from "cloudinary";
 
 export const createProduct = asyncErrorHandler(async (req, res, next) => {
   const {
@@ -13,40 +17,42 @@ export const createProduct = asyncErrorHandler(async (req, res, next) => {
     price,
     discountPrice,
     stock,
-    category,
-    subCategory,
+    category, // string (e.g. "Mobile")
+    subCategory, // string (e.g. "OnePlus")
   } = req.body;
 
-  // check category
-  const categoryExists = await Category.findById(category);
-  if (!categoryExists) {
-    return next(new AppError("Category not found", 404));
-  }
+  // 1️⃣ Find or Create Category
+  const categoryDoc = await findOrCreateCategory(Category, category);
 
-  // check subcategory
+  // 2️⃣ Find or Create SubCategory (linked to category)
+  let subCategoryDoc = null;
+
   if (subCategory) {
-    const subCategoryExists = await SubCategory.findById(subCategory);
-    if (!subCategoryExists) {
-      return next(new AppError("SubCategory not found", 404));
-    }
+    subCategoryDoc = await findOrCreateSubCategory(
+      SubCategory,
+      subCategory,
+      categoryDoc._id,
+    );
   }
 
-  // upload image
+  // 3️⃣ Upload image
   let imageData = null;
-
   if (req.files?.image) {
     imageData = await uploadImages(req.files.image);
   }
 
+  // 4️⃣ Create Product
   const product = await Product.create({
     name,
     description,
     price,
     discountPrice,
     stock,
-    category,
-    subCategory,
-    image: imageData ? imageData.url : null,
+    category: categoryDoc._id,
+    subCategory: subCategoryDoc?._id,
+    image: imageData
+      ? [{ public_id: imageData.public_id, url: imageData.url }]
+      : [],
   });
 
   res.status(201).json({
@@ -57,14 +63,74 @@ export const createProduct = asyncErrorHandler(async (req, res, next) => {
 });
 
 export const getProducts = asyncErrorHandler(async (req, res) => {
-  const products = await Product.find()
+  const { category, subCategory, search } = req.query;
+
+  let query = {};
+
+  // 🔍 Filter by category name
+  if (category) {
+    const categoryDoc = await Category.findOne({
+      name: { $regex: `^${category}$`, $options: "i" },
+    });
+
+    if (categoryDoc) {
+      query.category = categoryDoc._id;
+    } else {
+      return res.status(200).json({ success: true, data: [] });
+    }
+  }
+
+  // 🔍 Filter by subcategory name
+  if (subCategory) {
+    const subCategoryDoc = await SubCategory.findOne({
+      name: { $regex: `^${subCategory}$`, $options: "i" },
+    });
+
+    if (subCategoryDoc) {
+      query.subCategory = subCategoryDoc._id;
+    } else {
+      return res.status(200).json({ success: true, data: [] });
+    }
+  }
+
+  // 🔍 Search by product name
+  if (search) {
+    query.name = { $regex: search, $options: "i" };
+  }
+
+  // 📦 Fetch products
+  const products = await Product.find(query)
     .populate("category", "name")
     .populate("subCategory", "name");
+
+  // 📊 Group by category (simple JS)
+  const grouped = {};
+
+  products.forEach((p) => {
+    const catId = p.category._id.toString();
+
+    if (!grouped[catId]) {
+      grouped[catId] = {
+        category_id: p.category._id,
+        category_name: p.category.name,
+        products: [],
+      };
+    }
+
+    grouped[catId].products.push({
+      id: p._id,
+      name: p.name,
+      price: p.price,
+
+      subCategory: p.subCategory?.name || null,
+      image: p.image,
+    });
+  });
 
   res.status(200).json({
     success: true,
     count: products.length,
-    products,
+    data: Object.values(grouped),
   });
 });
 
@@ -84,37 +150,93 @@ export const getProductById = asyncErrorHandler(async (req, res, next) => {
 });
 
 export const updateProduct = asyncErrorHandler(async (req, res, next) => {
-  let product = await Product.findById(req.params.id);
-
-  if (!product) {
-    return next(new AppError("Product not found", 404));
-  }
-
-  // upload new image
-  if (req.files?.image) {
-    const imageData = await uploadImages(req.files.image);
-    req.body.image = imageData.url;
-  }
-
-  product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
-
-  res.status(200).json({
-    success: true,
-    message: "Product updated successfully",
-    product,
-  });
-});
-
-export const deleteProduct = asyncErrorHandler(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
 
   if (!product) {
     return next(new AppError("Product not found", 404));
   }
 
-  await product.deleteOne();
+  const {
+    name,
+    description,
+    price,
+    discountPrice,
+    stock,
+    category,
+    subCategory,
+  } = req.body || {};
+
+  let updateData = {};
+
+  if (name) updateData.name = name;
+  if (description) updateData.description = description;
+  if (price) updateData.price = price;
+  if (discountPrice) updateData.discountPrice = discountPrice;
+  if (stock) updateData.stock = stock;
+
+  if (category) {
+    const categoryDoc = await findOrCreateCategory(Category, category);
+    updateData.category = categoryDoc._id;
+
+    if (subCategory) {
+      const subCategoryDoc = await findOrCreateSubCategory(
+        SubCategory,
+        subCategory,
+        categoryDoc._id,
+      );
+      updateData.subCategory = subCategoryDoc._id;
+    } else {
+      updateData.subCategory = null;
+    }
+  } else if (subCategory) {
+    const subCategoryDoc = await SubCategory.findOne({
+      name: { $regex: `^${subCategory}$`, $options: "i" },
+    });
+
+    if (!subCategoryDoc) {
+      return next(new AppError("SubCategory not found", 404));
+    }
+
+    updateData.subCategory = subCategoryDoc._id;
+  }
+
+  // ✅ Fix 1: Check product.image (existing), not updateData.image (empty object)
+  // ✅ Fix 2: cloudinary is already imported as v2, so use cloudinary.uploader directly
+  if (req.files?.image) {
+    if (product.image?.length > 0 && product.image[0]?.public_id) {
+      await cloudinary.uploader.destroy(product.image[0].public_id);
+    }
+
+    const uploadedImage = await uploadImages(req.files.image);
+
+    // ✅ Fix 3: Wrap in array to match your schema: [{ public_id, url }]
+    updateData.image = [
+      { public_id: uploadedImage.public_id, url: uploadedImage.url },
+    ];
+  }
+
+  // ✅ Fix 4: { new: true } is the correct Mongoose option, not { returnDocument: true }
+  const updatedProduct = await Product.findByIdAndUpdate(
+    req.params.id,
+    updateData,
+    { new: true },
+  )
+    .populate("category", "name")
+    .populate("subCategory", "name");
+
+  res.status(200).json({
+    success: true,
+    message: "Product updated successfully",
+    product: updatedProduct,
+  });
+});
+
+export const deleteProduct = asyncErrorHandler(async (req, res, next) => {
+  const product = await Product.findByIdAndDelete(req.params.id);
+
+  if (!product) {
+    return next(new AppError("Product not found", 404));
+  }
 
   res.status(200).json({
     success: true,

@@ -6,22 +6,11 @@ export const createFeedback = async (req, res) => {
     const { rating, comment } = req.body;
     const { productId } = req.params;
 
-    const userId = req.user.id; // assuming user comes from auth middleware
-
-    // check if feedback already exists
-    const existingFeedback = await Feedback.findOne({
-      user: userId,
-      product: productId,
-    });
-
-    if (existingFeedback) {
-      return res.status(400).json({
-        message: "You already reviewed this product",
-      });
-    }
+    // 🎲 Generate anonymous name: GS-XXXX (4 random digits)
+    const anonymousName = `GS-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const feedback = await Feedback.create({
-      user: userId,
+      name: anonymousName,
       product: productId,
       rating,
       comment,
@@ -38,15 +27,14 @@ export const createFeedback = async (req, res) => {
     });
   }
 };
-
 // GET FEEDBACK FOR A PRODUCT
 export const getProductFeedback = async (req, res) => {
   try {
     const { productId } = req.params;
 
-    const feedbacks = await Feedback.find({ product: productId })
-      .populate("user", "firstname email")
-      .sort({ createdAt: -1 });
+    const feedbacks = await Feedback.find({ product: productId }).sort({
+      createdAt: -1,
+    });
 
     res.status(200).json({
       total: feedbacks.length,

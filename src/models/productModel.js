@@ -39,9 +39,12 @@ const productSchema = new mongoose.Schema(
       ref: "SubCategory",
     },
 
-    image: {
-      type: String,
-    },
+    image: [
+      {
+        public_id: String,
+        url: String,
+      },
+    ],
   },
   { timestamps: true },
 );
