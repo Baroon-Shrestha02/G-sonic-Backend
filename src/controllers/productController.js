@@ -70,7 +70,7 @@ export const getProducts = asyncErrorHandler(async (req, res) => {
   // 🔍 Filter by category name
   if (category) {
     const categoryDoc = await Category.findOne({
-      name: { $regex: `^${category}$`, $options: "i" },
+      name: { $regex: `^${category.trim()}$`, $options: "i" },
     });
 
     if (categoryDoc) {
@@ -80,10 +80,10 @@ export const getProducts = asyncErrorHandler(async (req, res) => {
     }
   }
 
-  // 🔍 Filter by subcategory name
+  // 🔍 Filter by subcategory name — use partial match instead of exact
   if (subCategory) {
     const subCategoryDoc = await SubCategory.findOne({
-      name: { $regex: `^${subCategory}$`, $options: "i" },
+      name: { $regex: subCategory.trim(), $options: "i" },
     });
 
     if (subCategoryDoc) {
@@ -95,7 +95,7 @@ export const getProducts = asyncErrorHandler(async (req, res) => {
 
   // 🔍 Search by product name
   if (search) {
-    query.name = { $regex: search, $options: "i" };
+    query.name = { $regex: search.trim(), $options: "i" };
   }
 
   // 📦 Fetch products
@@ -103,10 +103,13 @@ export const getProducts = asyncErrorHandler(async (req, res) => {
     .populate("category", "name")
     .populate("subCategory", "name");
 
-  // 📊 Group by category (simple JS)
+  // ✅ Guard: skip products where category failed to populate
+  const validProducts = products.filter((p) => p.category);
+
+  // 📊 Group by category
   const grouped = {};
 
-  products.forEach((p) => {
+  validProducts.forEach((p) => {
     const catId = p.category._id.toString();
 
     if (!grouped[catId]) {
@@ -121,7 +124,9 @@ export const getProducts = asyncErrorHandler(async (req, res) => {
       id: p._id,
       name: p.name,
       price: p.price,
-
+      discountPrice: p.discountPrice || null,
+      stock: p.stock,
+      description: p.description || null,
       subCategory: p.subCategory?.name || null,
       image: p.image,
     });
@@ -129,7 +134,7 @@ export const getProducts = asyncErrorHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    count: products.length,
+    count: validProducts.length,
     data: Object.values(grouped),
   });
 });
