@@ -8,6 +8,7 @@ import {
   getSubCategories,
   updateSubCategory,
   deleteSubCategory,
+  getNavbarData,
 } from "../controllers/CategoryController.js";
 
 import protect from "../middlewares/protectUser.js";
@@ -216,5 +217,8 @@ router.put("/subcategories/:id", protect, updateSubCategory);
  *         description: SubCategory not found
  */
 router.delete("/subcategories/:id", protect, deleteSubCategory);
+
+
+router.get("/navbar", getNavbarData);
 
 export default router;

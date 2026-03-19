@@ -1,5 +1,6 @@
 import Category from "../models/categoryModel.js";
 import SubCategory from "../models/subCategoryMode.js";
+import Product from "../models/productModel.js"
 import AppError from "../utils/appError.js";
 import asyncErrorHandler from "../utils/asyncErrorHandler.js";
 
@@ -70,4 +71,39 @@ export const deleteSubCategory = asyncErrorHandler(async (req, res, next) => {
   res
     .status(200)
     .json({ success: true, message: "SubCategory deleted successfully" });
+});
+
+// Navbar Category 
+export const getNavbarData = asyncErrorHandler(async (req, res) => {
+  const categories = await Category.find().lean();
+  const subCategories = await SubCategory.find().lean();
+  const products = await Product.find().lean();
+
+  const result = categories
+    .map((cat) => ({
+      title: cat.name,
+      categories: subCategories
+        .filter(
+          (sub) => sub.category.toString() === cat._id.toString()
+        )
+        .map((sub) => ({
+          name: sub.name,
+          items: products
+            .filter(
+              (prod) =>
+                prod.subCategory.toString() === sub._id.toString()
+            )
+            .map((prod) => ({
+              label: prod.name,
+              price: prod.price,
+            })),
+        }))
+        .filter((sub) => sub.items.length > 0),
+    }))
+    .filter((cat) => cat.categories.length > 0);
+
+  res.status(200).json({
+    success: true,
+    data: result,
+  });
 });
