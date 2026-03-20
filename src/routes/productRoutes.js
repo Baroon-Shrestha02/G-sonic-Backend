@@ -29,20 +29,17 @@ const router = express.Router();
  *         name: category
  *         schema:
  *           type: string
- *         description: Filter by category name (case-insensitive)
- *         example: Mobile
+ *         example: Chest Freezer
  *       - in: query
  *         name: subCategory
  *         schema:
  *           type: string
- *         description: Filter by subCategory name (partial match)
- *         example: Apple
+ *         example: Single Door
  *       - in: query
  *         name: search
  *         schema:
  *           type: string
- *         description: Search by product name (partial match)
- *         example: Iphone
+ *         example: 220 lttre .....
  *     responses:
  *       200:
  *         description: Products grouped by category
@@ -52,38 +49,37 @@ const router = express.Router();
  *               success: true
  *               count: 2
  *               data:
- *                 - category_id: "69ba43a5efb3b9f635a73425"
+ *                 - category_id: "cat1"
  *                   category_name: "Mobile"
  *                   products:
- *                     - id: "69ba49229af74acdf1d758ab"
- *                       name: "OnePlus 12"
+ *                     - id: "prod12334"
+ *                       name: "220 Litre... "
  *                       price: 100000
  *                       discountPrice: 90000
  *                       stock: 15
- *                       description: "Flagship killer smartphone"
- *                       subCategory: "One Plus"
+ *                       description: "For Daily home usage"
+ *                       subCategory: "Single Door"
+ *                       specs:
+ *                         Capacity: "220 Litre"
+ *                         Spaces: "Double Compartments"
  *                       image:
- *                         - public_id: "zj93gofi7dsmgd0h7kwq"
- *                           url: "https://res.cloudinary.com/sample/image.png"
- *                           _id: "69ba49229af74acdf1d758ac"
- *                     - id: "69ba91844e812a0c48ada750"
- *                       name: "Iphone 17 Pro Max"
+ *                         - public_id: "abc123"
+ *                           url: "https://res.cloudinary.com/sample.png"
+ *
+ *                     - id: "prod2134"
+ *                       name: "120 Litre Double Door"
  *                       price: 200000
- *                       discountPrice: null
+ *                       discountPrice: 160000
  *                       stock: 10
- *                       description: "Latest Apple flagship"
- *                       subCategory: "Apple"
+ *                       description: "Latest Chrest freezer for Home use"
+ *                       subCategory: "Double Door"
+ *                       specs:
+ *                         Capacity: "120 Litre"
+ *                         Spaces: "Double Compartments with two doors"
  *                       image:
- *                         - public_id: "ooc4dadnnsurssudubk0"
- *                           url: "https://res.cloudinary.com/sample/image.webp"
- *                           _id: "69ba91c44e812a0c48ada75a"
- *       500:
- *         description: Server error
- *         content:
- *           application/json:
- *             example:
- *               status: "error"
- *               message: "Internal server error"
+ *                         - public_id: "xyz789"
+ *                           url: "https://res.cloudinary.com/sample.webp"
+ *
  */
 router.get("/products", getProducts);
 
@@ -99,7 +95,6 @@ router.get("/products", getProducts);
  *         required: true
  *         schema:
  *           type: string
- *         description: Product ID
  *     responses:
  *       200:
  *         description: Product details
@@ -108,26 +103,19 @@ router.get("/products", getProducts);
  *             example:
  *               success: true
  *               product:
- *                 _id: "prod1"
- *                 name: "OnePlus 12"
- *                 description: "Latest flagship phone"
- *                 price: 80000
- *                 discountPrice: 75000
- *                 stock: 10
- *                 category:
- *                   name: "Mobile"
- *                 subCategory:
- *                   name: "OnePlus"
- *                 image:
- *                   - public_id: "products/abc123"
- *                     url: "https://res.cloudinary.com/sample.jpg"
- *       404:
- *         description: Product not found
- *         content:
- *           application/json:
- *             example:
- *               status: "error"
- *               message: "Product not found"
+ *                  id: "prod12334"
+ *                  name: "220 Litre... "
+ *                  price: 100000
+ *                  discountPrice: 90000
+ *                  stock: 15
+ *                  description: "For Daily home usage"
+ *                  subCategory: "Single Door"
+ *                  specs:
+ *                    Capacity: "220 Litre"
+ *                    Spaces: "Double Compartments"
+ *                  image:
+ *                    - public_id: "abc123"
+ *                      url: "https://res.cloudinary.com/sample.png"
  */
 router.get("/products/:id", getProductById);
 
@@ -154,53 +142,25 @@ router.get("/products/:id", getProductById);
  *             properties:
  *               name:
  *                 type: string
- *                 example: "OnePlus 12"
  *               description:
  *                 type: string
- *                 example: "Latest flagship phone"
  *               price:
  *                 type: number
- *                 example: 80000
  *               discountPrice:
  *                 type: number
- *                 example: 75000
  *               stock:
  *                 type: number
- *                 example: 10
  *               category:
  *                 type: string
- *                 example: "Mobile"
  *               subCategory:
  *                 type: string
- *                 example: "OnePlus"
  *               image:
  *                 type: string
  *                 format: binary
- *     responses:
- *       201:
- *         description: Product created successfully
- *         content:
- *           application/json:
- *             example:
- *               success: true
- *               message: "Product created successfully"
- *               product:
- *                 _id: "prod1"
- *                 name: "OnePlus 12"
- *                 price: 80000
- *                 stock: 10
- *                 category: "cat1"
- *                 subCategory: "sub1"
- *                 image:
- *                   - public_id: "products/abc123"
- *                     url: "https://res.cloudinary.com/sample.jpg"
- *       401:
- *         description: Unauthorized - Token missing or invalid
- *         content:
- *           application/json:
- *             example:
- *               status: "error"
- *               message: "You are not logged in"
+ *               specs:   # ✅ NEW
+ *                 type: string
+ *                 description: JSON string of specs
+ *                 example: '{"Capacity":"220 Litre","Space":"Single Door...."}'
  */
 router.post("/products", protect, createProduct);
 
@@ -218,7 +178,6 @@ router.post("/products", protect, createProduct);
  *         required: true
  *         schema:
  *           type: string
- *         description: Product ID
  *     requestBody:
  *       content:
  *         multipart/form-data:
@@ -227,62 +186,25 @@ router.post("/products", protect, createProduct);
  *             properties:
  *               name:
  *                 type: string
- *                 example: "OnePlus 12 Pro"
  *               description:
  *                 type: string
- *                 example: "Updated description"
  *               price:
  *                 type: number
- *                 example: 85000
  *               discountPrice:
  *                 type: number
- *                 example: 80000
  *               stock:
  *                 type: number
- *                 example: 15
  *               category:
  *                 type: string
- *                 example: "Mobile"
  *               subCategory:
  *                 type: string
- *                 example: "OnePlus"
  *               image:
  *                 type: string
  *                 format: binary
- *     responses:
- *       200:
- *         description: Product updated successfully
- *         content:
- *           application/json:
- *             example:
- *               success: true
- *               message: "Product updated successfully"
- *               product:
- *                 _id: "prod1"
- *                 name: "OnePlus 12 Pro"
- *                 price: 85000
- *                 stock: 15
- *                 category:
- *                   name: "Mobile"
- *                 subCategory:
- *                   name: "OnePlus"
- *                 image:
- *                   - public_id: "products/abc123"
- *                     url: "https://res.cloudinary.com/sample.jpg"
- *       404:
- *         description: Product not found
- *         content:
- *           application/json:
- *             example:
- *               status: "error"
- *               message: "Product not found"
- *       401:
- *         description: Unauthorized
- *         content:
- *           application/json:
- *             example:
- *               status: "error"
- *               message: "You are not logged in"
+ *               specs:
+ *                 type: string
+ *                 description: JSON string of specs
+ *                 example: '{"Capacity":"120 Ltre","Capacity":"Double Door"}'
  */
 router.patch("/products/:id", protect, updateProduct);
 
@@ -299,30 +221,11 @@ router.patch("/products/:id", protect, updateProduct);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *            type: string
  *         description: Product ID
  *     responses:
  *       200:
- *         description: Product deleted successfully
- *         content:
- *           application/json:
- *             example:
- *               success: true
- *               message: "Product deleted successfully"
- *       404:
- *         description: Product not found
- *         content:
- *           application/json:
- *             example:
- *               status: "error"
- *               message: "Product not found"
- *       401:
- *         description: Unauthorized
- *         content:
- *           application/json:
- *             example:
- *               status: "error"
- *               message: "You are not logged in"
+ *          description : Product deleted successfully
  */
 router.delete("/products/:id", protect, deleteProduct);
 
