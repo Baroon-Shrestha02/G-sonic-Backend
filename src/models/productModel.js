@@ -45,6 +45,14 @@ const productSchema = new mongoose.Schema(
         url: String,
       },
     ],
+    specs: {
+      type: Map,
+      of: {
+        type: String,
+        trim: true,
+      },
+      default: {},
+    },
   },
   { timestamps: true },
 );

@@ -17,8 +17,9 @@ export const createProduct = asyncErrorHandler(async (req, res, next) => {
     price,
     discountPrice,
     stock,
-    category, // string (e.g. "Mobile")
-    subCategory, // string (e.g. "OnePlus")
+    category,
+    subCategory,
+    specs,
   } = req.body;
 
   // 1️⃣ Find or Create Category
@@ -41,6 +42,12 @@ export const createProduct = asyncErrorHandler(async (req, res, next) => {
     imageData = await uploadImages(req.files.image);
   }
 
+  let parsedSpecs = {};
+
+  if (specs) {
+    parsedSpecs = typeof specs === "string" ? JSON.parse(specs) : specs;
+  }
+
   // 4️⃣ Create Product
   const product = await Product.create({
     name,
@@ -50,6 +57,7 @@ export const createProduct = asyncErrorHandler(async (req, res, next) => {
     stock,
     category: categoryDoc._id,
     subCategory: subCategoryDoc?._id,
+    specs: parsedSpecs,
     image: imageData
       ? [{ public_id: imageData.public_id, url: imageData.url }]
       : [],
@@ -128,6 +136,7 @@ export const getProducts = asyncErrorHandler(async (req, res) => {
       stock: p.stock,
       description: p.description || null,
       subCategory: p.subCategory?.name || null,
+      specs: Object.fromEntries(p.specs || {}),
       image: p.image,
     });
   });
@@ -150,7 +159,10 @@ export const getProductById = asyncErrorHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    product,
+    product: {
+      ...product.toObject(),
+      specs: Object.fromEntries(product.specs || {}),
+    },
   });
 });
 
@@ -169,6 +181,7 @@ export const updateProduct = asyncErrorHandler(async (req, res, next) => {
     stock,
     category,
     subCategory,
+    specs,
   } = req.body || {};
 
   let updateData = {};
@@ -205,8 +218,6 @@ export const updateProduct = asyncErrorHandler(async (req, res, next) => {
     updateData.subCategory = subCategoryDoc._id;
   }
 
-  // ✅ Fix 1: Check product.image (existing), not updateData.image (empty object)
-  // ✅ Fix 2: cloudinary is already imported as v2, so use cloudinary.uploader directly
   if (req.files?.image) {
     if (product.image?.length > 0 && product.image[0]?.public_id) {
       await cloudinary.uploader.destroy(product.image[0].public_id);
@@ -214,13 +225,17 @@ export const updateProduct = asyncErrorHandler(async (req, res, next) => {
 
     const uploadedImage = await uploadImages(req.files.image);
 
-    // ✅ Fix 3: Wrap in array to match your schema: [{ public_id, url }]
     updateData.image = [
       { public_id: uploadedImage.public_id, url: uploadedImage.url },
     ];
   }
 
-  // ✅ Fix 4: { new: true } is the correct Mongoose option, not { returnDocument: true }
+  if (specs) {
+    const parsedSpecs = typeof specs === "string" ? JSON.parse(specs) : specs;
+
+    updateData.specs = parsedSpecs;
+  }
+
   const updatedProduct = await Product.findByIdAndUpdate(
     req.params.id,
     updateData,
