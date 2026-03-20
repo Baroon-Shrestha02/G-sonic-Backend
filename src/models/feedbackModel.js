@@ -2,37 +2,47 @@ import mongoose from "mongoose";
 
 const feedbackSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
-
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
-      required: true,
-    },
-
-    rating: {
-      type: Number,
-      required: true,
-      min: 1,
-      max: 5,
-    },
-
-    comment: {
+    firstName: {
       type: String,
       required: true,
       trim: true,
-      maxlength: 500,
+    },
+
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+      match: [/^\S+@\S+\.\S+$/, "Please use a valid email address"],
+    },
+
+    phoneNumber: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    message: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 1000,
+    },
+
+    image: {
+      type: String,
+      required: false,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
-// prevent duplicate review per product per user
-feedbackSchema.index({ user: 1, product: 1 }, { unique: true });
-
-const Feedback = mongoose.model("feedback", feedbackSchema);
+const Feedback = mongoose.model("Feedback", feedbackSchema);
 
 export default Feedback;

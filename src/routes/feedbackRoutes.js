@@ -1,7 +1,7 @@
 import express from "express";
 import {
   createFeedback,
-  getProductFeedback,
+  getAllFeedback,
 } from "../controllers/feebackController.js";
 
 const router = express.Router();
@@ -109,6 +109,6 @@ router.post("/send-feedback/:productId", createFeedback);
  *               message: "Error fetching feedback"
  *               error: "Internal server error"
  */
-router.get("/get-feedback/:productId", getProductFeedback);
+router.get("/get-feedback/:productId", getAllFeedback);
 
 export default router;
