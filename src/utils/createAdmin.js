@@ -1,9 +1,10 @@
 import bcrypt from "bcrypt";
 import User from "../models/userModel.js";
+import cloudinary from "cloudinary";
 
 const createAdmin = async () => {
   try {
-    const adminEmail = "gsonicadmin@gmail.com";
+    const adminEmail = "admingsonic@gmail.com";
     const adminPassword = "admin123";
 
     const adminExists = await User.findOne({ email: adminEmail });
@@ -15,13 +16,20 @@ const createAdmin = async () => {
 
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
+    // Optional: Upload default admin image from URL
+    let profileImg = {
+      public_id: "default_zwcp1h",
+      url: "https://res.cloudinary.com/dxu7hzo7w/image/upload/v1774330152/profile_ryeo1l.avif",
+    };
+
     const admin = await User.create({
       firstname: "Gsonic",
       lastname: "admin",
-      phone: "9812345678",
+      phone: "9807654321",
       email: adminEmail,
       password: hashedPassword,
       role: "admin",
+      profileImg: profileImg,
     });
 
     console.log(`Admin created successfully: ${admin.email}`);
