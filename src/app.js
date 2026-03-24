@@ -11,6 +11,8 @@ import fileUpload from "express-fileupload";
 import productRoutes from "./routes/productRoutes.js";
 import CategoryRoutes from "./routes/CategoryRoutes.js";
 import feedbackRoutes from "./routes/feedbackRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+
 import swaggerSpec from "./config/swagger.js";
 
 const app = express();
@@ -52,6 +54,8 @@ app.use(
 app.use("/api/v1", productRoutes);
 app.use("/api/v1", CategoryRoutes);
 app.use("/api/v1", feedbackRoutes);
+app.use("/api/v1", userRoutes);
+
 app.use("/api/auth", authRoutes);
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
