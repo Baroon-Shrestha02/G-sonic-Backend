@@ -12,7 +12,6 @@ import productRoutes from "./routes/productRoutes.js";
 import CategoryRoutes from "./routes/CategoryRoutes.js";
 import feedbackRoutes from "./routes/feedbackRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
-
 import swaggerSpec from "./config/swagger.js";
 
 const app = express();
