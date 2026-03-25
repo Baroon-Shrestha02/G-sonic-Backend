@@ -19,7 +19,7 @@ const options = {
         description: "Development server",
       },
       {
-        url: "https://g-sonic-backend.onrender.com",
+        url: "https://g-sonic-backend-1.onrender.com",
         description: "Hosted testing server",
       },
     ],
