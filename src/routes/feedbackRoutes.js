@@ -8,56 +8,114 @@ const router = express.Router();
 
 /**
  * @swagger
- * tags:
- *   name: Feedback
- *   description: Product feedback and reviews APIs
- */
-
-/**
- * @swagger
+ * /api/v1/feedback:
+ *   post:
+ *     summary: Submit feedback (optionally with an image)
+ *     tags: [Feedback]
+ *     description: |
+ *       Submit a feedback form entry. This endpoint supports both `application/json` (no image)
+ *       and `multipart/form-data` (to include an `image` file).
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: "#/components/schemas/FeedbackCreateRequest"
+ *         multipart/form-data:
+ *           schema:
+ *             $ref: "#/components/schemas/FeedbackCreateRequest"
+ *     responses:
+ *       201:
+ *         description: Feedback created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Feedback submitted successfully"
+ *                 feedback:
+ *                   $ref: "#/components/schemas/Feedback"
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Error creating feedback"
+ *               error: "Internal server error"
+ *   get:
+ *     summary: Get all feedback (newest first)
+ *     tags: [Feedback]
+ *     description: Returns all feedback entries in reverse chronological order.
+ *     responses:
+ *       200:
+ *         description: List of feedback (newest first)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 total:
+ *                   type: number
+ *                   example: 2
+ *                 feedbacks:
+ *                   type: array
+ *                   items:
+ *                     $ref: "#/components/schemas/Feedback"
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Error fetching feedback"
+ *               error: "Internal server error"
+ *
  * /api/v1/send-feedback/{productId}:
  *   post:
- *     summary: Submit anonymous feedback for a product
+ *     summary: Submit feedback (optionally with an image)
  *     tags: [Feedback]
+ *     deprecated: true
+ *     description: |
+ *       Submit a feedback form entry. This endpoint supports both `application/json` (no image)
+ *       and `multipart/form-data` (to include an `image` file).
+ *
+ *       Deprecated. Use `POST /api/v1/feedback` instead.
  *     parameters:
  *       - in: path
  *         name: productId
  *         required: true
  *         schema:
  *           type: string
- *         description: Product ID to review
+ *         description: Currently unused path param (kept for compatibility).
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - rating
- *               - comment
- *             properties:
- *               rating:
- *                 type: number
- *                 minimum: 1
- *                 maximum: 5
- *                 example: 4
- *               comment:
- *                 type: string
- *                 example: "This shop's customer service is really good."
+ *             $ref: "#/components/schemas/FeedbackCreateRequest"
+ *         multipart/form-data:
+ *           schema:
+ *             $ref: "#/components/schemas/FeedbackCreateRequest"
  *     responses:
  *       201:
  *         description: Feedback created successfully
  *         content:
  *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Feedback submitted successfully"
+ *                 feedback:
+ *                   $ref: "#/components/schemas/Feedback"
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
  *             example:
- *               message: "Feedback created successfully"
- *               feedback:
- *                 _id: "feedbackId"
- *                 name: "GS-4823"
- *                 product: "69ba91844e812a0c48ada750"
- *                 rating: 4
- *                 comment: "This shop's customer service is really good."
- *                 createdAt: "2026-03-18T12:00:00.000Z"
+ *               message: "Validation error"
  *       500:
  *         description: Server error
  *         content:
@@ -66,41 +124,44 @@ const router = express.Router();
  *               message: "Error creating feedback"
  *               error: "Internal server error"
  */
+router.post("/feedback", createFeedback);
+router.get("/feedback", getAllFeedback);
+
 router.post("/send-feedback/:productId", createFeedback);
 
 /**
  * @swagger
  * /api/v1/get-feedback/{productId}:
  *   get:
- *     summary: Get all feedback for a product
+ *     summary: Get all feedback (newest first)
  *     tags: [Feedback]
+ *     deprecated: true
+ *     description: |
+ *       Returns all feedback entries in reverse chronological order.
+ *
+ *       Deprecated. Use `GET /api/v1/feedback` instead.
  *     parameters:
  *       - in: path
  *         name: productId
  *         required: true
  *         schema:
  *           type: string
- *         description: Product ID
+ *         description: Currently unused path param (kept for compatibility).
  *     responses:
  *       200:
- *         description: List of feedbacks for the product (newest first)
+ *         description: List of feedback (newest first)
  *         content:
  *           application/json:
- *             example:
- *               total: 2
- *               feedbacks:
- *                 - _id: "feedback1"
- *                   name: "GS-4823"
- *                   product: "69ba91844e812a0c48ada750"
- *                   rating: 5
- *                   comment: "Excellent product!"
- *                   createdAt: "2026-03-18T12:00:00.000Z"
- *                 - _id: "feedback2"
- *                   name: "GS-1047"
- *                   product: "69ba91844e812a0c48ada750"
- *                   rating: 3
- *                   comment: "Average quality"
- *                   createdAt: "2026-03-17T09:00:00.000Z"
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 total:
+ *                   type: number
+ *                   example: 2
+ *                 feedbacks:
+ *                   type: array
+ *                   items:
+ *                     $ref: "#/components/schemas/Feedback"
  *       500:
  *         description: Server error
  *         content:
