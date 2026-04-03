@@ -29,7 +29,7 @@ export const changePassword = asyncErrorHandler(async (req, res, next) => {
   const isMatch = await bcrypt.compare(currentPassword, user.password);
 
   if (!isMatch) {
-    return next(new AppError("Current password is incorrect", 401));
+    return next(new AppError("Current password is incorrect", 400));
   }
 
   // 5. Prevent same password reuse
