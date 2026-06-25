@@ -4,8 +4,8 @@ import cloudinary from "cloudinary";
 
 const createAdmin = async () => {
   try {
-    const adminEmail = "admingsonic@gmail.com";
-    const adminPassword = "admin1234";
+    const adminEmail = "gsonicadmin@gmail.com";
+    const adminPassword = "gsonic123";
 
     const adminExists = await User.findOne({ email: adminEmail });
 
